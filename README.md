@@ -168,6 +168,19 @@ pacman -Sy grub os-prober
 grub-install --target=i386-pc /dev/nvmen1p1
 ```
 
+
+Installing Audio Drivers
+--------------------
+
+```
+sudo pacman -Sy pulseaudio pavucontrol
+```
+
+
+I needed to restart my computer after running these commands for the sound to start.
+(There was probably a service, but I couldn't find it...)
+
+
 > This is incomplete. I need to keep working on this (1109 September 30th 2019)
 
 [Brasero]: https://wiki.gnome.org/Apps/Brasero
