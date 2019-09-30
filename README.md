@@ -63,6 +63,28 @@ net start home
 
 At that point, I could connect to the Internet!
 
+Updating the Time Service
+----------------------
+
+```
+timedatectl set-ntp true
+```
+
+Partitioning the Disks
+----------------------
+
+I used this command to determine which devices are set up already.
+
+```
+fdisk -l
+```
+
+In my case of my DELL XPS 15, I had `/dev/nvmen1p1`, `/dev/nvmen1p2` and `/dev/nvmen1p3` all set up (because I did have Ubuntu installed on this previously).
+
+My `/dev/nvmen1p1` was the EFI partition for GRUB, `/dev/nvmen1p2` was my EXT4 filesystem, and `/dev/nvmen1p3` was my swapspace.
+
+
+
 
 > This is incomplete. I need to keep working on this (1109 September 30th 2019)
 
