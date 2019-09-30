@@ -83,6 +83,57 @@ In my case of my DELL XPS 15, I had `/dev/nvmen1p1`, `/dev/nvmen1p2` and `/dev/n
 
 My `/dev/nvmen1p1` was the EFI partition for GRUB, `/dev/nvmen1p2` was my EXT4 filesystem, and `/dev/nvmen1p3` was my swapspace.
 
+_If you needed to partition the drive manually, like you were setting up in a virtual machine, I would recommend using `cfdisk`._
+
+In my case, I needed to format these partitions with their appropriate purposes.
+
+```
+mkfs.ext4 /dev/nvmen1p2
+mkswap /dev/nvmen1p3
+swapon /dev/nvmen1p3
+```
+
+I handled the `/dev/nvmen1p1` EFI partition later, when I would install GRUB.
+
+Mounting the Filesystem
+-------------------
+
+```
+mount /dev/nvmen1p2 /mnt
+```
+
+Installing Arch
+-------------
+
+```
+pacstrap /mnt base
+```
+
+Configure the system
+-------------
+
+```
+genfstab -U /mnt >> /mnt/etc/fstab
+```
+
+Chroot into the new filesystem
+----------------
+
+```
+arch-chroot /mnt
+```
+
+Setting the timezone
+--------------
+
+```
+ln -sf /usr/share/zoneinfo/EST5EDT /etc/localtime
+hwclock --systohc
+```
+
+Localization
+------------
+
 
 
 
