@@ -134,8 +134,39 @@ hwclock --systohc
 Localization
 ------------
 
+```
+sed 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen
+echo "LANG=en_US.UTF-8" > /etc/locale.conf
+```
 
+Hostname
+----------
 
+```
+echo arch > /etc/hostname
+
+cat <<EOF >/etc/hosts
+127.0.0.1 localhost
+::1	      localhost
+127.0.1.1 arch.localdomain arch
+EOF
+```
+
+Set root passwd
+----------
+
+```
+passwd
+```
+
+Install GRUB
+---------
+
+```
+pacman -Sy grub os-prober
+
+grub-install --target=i386-pc /dev/nvmen1p1
+```
 
 > This is incomplete. I need to keep working on this (1109 September 30th 2019)
 
