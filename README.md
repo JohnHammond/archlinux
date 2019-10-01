@@ -15,10 +15,12 @@ I downloaded the `archlinux-2019.09.01-x86_64.iso` from here: [https://www.archl
 I searched for a United States mirror and chose one: specifically, I used: [http://mirrors.acm.wpi.edu/archlinux/iso/2019.09.01/](http://mirrors.acm.wpi.edu/archlinux/iso/2019.09.01/)
 
 
+
 Burning the ISO to a Disc
 -------------------------
 
 I still had Ubuntu at the time, so I burned the Arch Linux ISO to a disc with [Brasero]. 
+
 
 
 Booting the Arch Linux Live Disc
@@ -35,6 +37,8 @@ ls /sys/firmware/efi/efivars
 ```
 
 This had results, so I knew I successfully booted with UEFI. Good enough!
+
+
 
 Connecting to the Internet
 ----------------
@@ -165,8 +169,13 @@ Install GRUB
 ```
 pacman -Sy grub os-prober
 
-grub-install --target=i386-pc /dev/nvmen1p1
 ```
+
+> This section is incomplete -- I still need to deal with it.
+
+
+**DO NOT forget to copy over a network profile for `netctl` and install `netctl` and `network-manager`
+so you still have internet access when you reboot into the real system** 
 
 
 Installing Audio Drivers
@@ -181,6 +190,90 @@ I needed to restart my computer after running these commands for the sound to st
 (There was probably a service, but I couldn't find it...)
 
 
+Getting yay and AUR Support
+----------
+
+First get ready to work with PKGBUILD files:
+
+```
+sudo pacman -S --needed base-devel
+```
+
+Then get `yay`:
+
+```
+git clone https://aur.archlinux.org/yay.git
+cd yay
+makepkg -si
+```
+
+
+Correcting .bashrc
+------------------
+
+I copy and pasted the default Ubuntu bashrc from here:
+
+* [https://gist.github.com/indrakaw/1fdbc51639081216f04a025b1add2506](https://gist.github.com/indrakaw/1fdbc51639081216f04a025b1add2506)
+
+Installing tmux
+---------------
+
+```
+pacman -Sy tmux
+echo 'source "$HOME/.bashrc"' > ~/.bashrc
+
+Installing xrandr
+----------------
+
+```
+pacman -S xorg-xrandr
+```
+
+Setting proper monitor size
+--------------------------
+
+```
+xrandr --output DP-3 --scale 2x2 --mode 2560x1080
+```	
+
+
+Getting monokai in vim
+----------------------
+
+
+First I downloaded vim-plug. [https://github.com/junegunn/vim-plug](https://github.com/junegunn/vim-plug)
+
+```
+curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+```
+
+Then, I could modify my `~/.vimrc` file to what it is now.
+Then I would run `:PlugInstall` from within vim and it would install the module for me.
+
+Tmux would act strange though -- I would need to be sure to remove all of the tmux
+sessions before I could see the vim changes take effect.
+
+```bash
+tmux ls # to see the running sessions
+tmux kill-session -t 2   # to kill the other sessions
+```
+
+Installing OBS-Studio
+--------------
+
+```
+yay -S obs-studio
+```
+
+Installing FontAwesome
+-----------------------
+
+```
+yay -S ttf-font-awesome
+```
+
+
 > This is incomplete. I need to keep working on this (1109 September 30th 2019)
 
-[Brasero]: https://wiki.gnome.org/Apps/Brasero
+
