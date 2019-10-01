@@ -74,12 +74,26 @@ function configure_terminator(){
 
 function configure_bashrc(){
 	echo_green "Getting default .bashrc"
-	curl -s "https://gist.githubusercontent.com/indrakaw/1fdbc51639081216f04a025b1add2506/raw/04838587ce726800d2679abd6df6274a64fcb4d8/.bashrc" > ~/.bashrc
+
+	cp bashrc ~/.bashrc
+	. ~/.bashrc
 }
 
 function configure_tmux(){
 	echo 'source "$HOME/.bashrc"' > ~/.bash_profile
 	cp tmux.conf ~/.tmux.conf
+}
+
+function configure_vim(){
+	echo_green "Configuring vim..."
+	curl -sfLo ~/.vim/autoload/plug.vim --create-dirs "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
+
+	cp vimrc ~/.vimrc
+	vim ~/.vimrc +PlugInstall +q +q
+}
+
+function configure_git(){
+	git config --global core.editor "vim"
 }
 
 ###############################################################
@@ -127,3 +141,5 @@ configure_x
 configure_terminator
 configure_bashrc
 configure_tmux
+configure_vim
+configure_git
