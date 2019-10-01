@@ -62,6 +62,7 @@ DEPENDENCIES="\
 ##############################################################
 
 function create_new_user(){
+	pacman -Sy sudo --noconfirm
 	id -u $NEW_USER > /dev/null
 
 	if [ $? -eq 1 ]
@@ -79,11 +80,16 @@ function create_new_user(){
 	groupadd sudo
 	usermod -aG sudo $NEW_USER
 	sed -i 's/# %sudo/%sudo/g' /etc/sudoers
+	echo "$NEW_USER ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 	chown $NEW_USER:$NEW_USER /home/$NEW_USER
 	chown -R $NEW_USER:$NEW_USER $(pwd)
 	mv $(pwd) /home/$NEW_USER/archlinux
 	cd /home/$NEW_USER/archlinux
+}
+
+function cleanup(){
+	sed -i "s/$NEW_USER ALL=(ALL) NOPASSWD: ALL//g" /etc/sudoers
 }
 
 ###############################################################
@@ -150,7 +156,7 @@ function install_yay(){
 
 	chown $NEW_USER:$NEW_USER /opt/yay
 	cd yay
-	sudo -u $NEW_USER bash -c 'cd /opt/yay/ && makepkg -si'
+	sudo -u $NEW_USER bash -c 'cd /opt/yay/ && yes|makepkg -si'
 	popd
 	sudo -u $NEW_USER bash -c 'yes|yay'
 }
@@ -215,3 +221,5 @@ configure_vim
 configure_git
 prepare_opt
 install_yay
+
+cleanup
