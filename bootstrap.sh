@@ -7,6 +7,8 @@
 # and configuration that I need to get Arch Linux up and running
 # quickly and easily.
 
+NEW_USER=$1
+
 # Define some colors for quick use...
 COLOR_RED=$(tput setaf 1)
 COLOR_GREEN=$(tput setaf 2)
@@ -57,46 +59,80 @@ DEPENDENCIES="\
 
 "
 
+##############################################################
+
+function create_new_user(){
+	id -u $NEW_USER > /dev/null
+
+	if [ $? -eq 1 ]
+	then
+		echo_green "Creating new user $COLOR_BLUE$NEW_USER"
+
+		mkdir /home/$NEW_USER
+		useradd $NEW_USEiR
+		echo_yellow "Please set the password for $COLOR_BLUE$NEW_USER:"
+		passwd $NEW_USER
+	else
+		echo_green "New user already exists, using that account for everything"
+	fi
+
+	chown $NEW_USER:$NEW_USER /home/$NEW_USER
+	chown $NEW_USER:$NEW_USER *
+}
 
 ###############################################################
 
 
 function configure_x(){
 	echo_green "Configuring X"
-	echo "exec i3" > ~/.xinitrc
-	cp Xresources ~/.Xresources
+	sudo -u $NEW_USER bash -c 'echo "exec i3" > ~/.xinitrc'
+	sudo -u $NEW_USER bash -c 'cp Xresources ~/.Xresources'
 }
 
 function configure_terminator(){
 	echo_green "Configuring Terminator"
-	mkdir -p ~/.config/terminator
-	cp terminator_config ~/.config/terminator/config
+	sudo -u $NEW_USER bash -c 'mkdir -p ~/.config/terminator'
+	sudo -u $NEW_USER bash -c 'cp terminator_config ~/.config/terminator/config'
 }
 
 function configure_bashrc(){
 	echo_green "Getting default .bashrc"
 
-	cp bashrc ~/.bashrc
-	. ~/.bashrc
+	sudo -u $NEW_USER bash -c 'cp bashrc ~/.bashrc'
+	sudo -u $NEW_USER bash -c '. ~/.bashrc'
 }
 
 function configure_tmux(){
-	echo 'source "$HOME/.bashrc"' > ~/.bash_profile
-	cp tmux.conf ~/.tmux.conf
+	sudo -u $NEW_USER bash -c "echo 'source \"\$HOME/.bashrc\"' > ~/.bash_profile"
+	sudo -u $NEW_USER bash -c 'cp tmux.conf ~/.tmux.conf'
 }
 
 function configure_vim(){
 	echo_green "Configuring vim..."
-	curl -sfLo ~/.vim/autoload/plug.vim --create-dirs "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
+	sudo -u $NEW_USER bash -c 'curl -sfLo ~/.vim/autoload/plug.vim --create-dirs "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"'
 
-	cp vimrc ~/.vimrc
-	vim ~/.vimrc +PlugInstall +q +q
+	sudo -u $NEW_USER bash -c 'cp vimrc ~/.vimrc'
+	sudo -u $NEW_USER bash -c 'vim ~/.vimrc +PlugInstall +q +q'
 }
 
 function configure_git(){
-	git config --global core.editor "vim"
-	git config --global user.email "johnhammond010@gmail.com"
-	git config --global user.name "John Hammond"
+	sudo -u $NEW_USER bash -c 'git config --global core.editor "vim"'
+	sudo -u $NEW_USER bash -c 'git config --global user.email "johnhammond010@gmail.com"'
+	sudo -u $NEW_USER bash -c 'git config --global user.name "John Hammond"'
+}
+
+##############################################################
+
+function prepare_opt(){
+	chown $NEW_USER:$NEW_USER /opt
+}
+
+function install_yay(){
+	pushd /opt/
+	git clone https://aur.archlinux.org/yay.git
+	cd yay
+	makepkg -si
+	popd
 }
 
 ###############################################################
@@ -138,7 +174,17 @@ function install_niceties(){
 	pacman -Sy $DEPENDENCIES --noconfirm --color=always
 }
 
+
+
+if [ "$1" == "" ]
+then
+	echo_red "You must supply a username to use."
+	echo "usage: $0 <new_username>"
+	exit
+fi
+
 pre_install
+create_new_user
 install_niceties
 configure_x
 configure_terminator
@@ -146,3 +192,5 @@ configure_bashrc
 configure_tmux
 configure_vim
 configure_git
+prepare_opt
+install_yay
