@@ -69,15 +69,21 @@ function create_new_user(){
 		echo_green "Creating new user $COLOR_BLUE$NEW_USER"
 
 		mkdir /home/$NEW_USER
-		useradd $NEW_USEiR
+		useradd $NEW_USER
 		echo_yellow "Please set the password for $COLOR_BLUE$NEW_USER:"
 		passwd $NEW_USER
 	else
 		echo_green "New user already exists, using that account for everything"
 	fi
 
+	groupadd sudo
+	usermod -aG sudo $NEW_USER
+	sed -i 's/# %sudo/%sudo/g' /etc/sudoers
+
 	chown $NEW_USER:$NEW_USER /home/$NEW_USER
-	chown $NEW_USER:$NEW_USER *
+	chown -R $NEW_USER:$NEW_USER $(pwd)
+	mv $(pwd) /home/$NEW_USER/archlinux
+	cd /home/$NEW_USER/archlinux
 }
 
 ###############################################################
@@ -100,6 +106,7 @@ function configure_bashrc(){
 
 	sudo -u $NEW_USER bash -c 'cp bashrc ~/.bashrc'
 	sudo -u $NEW_USER bash -c '. ~/.bashrc'
+	cp bashrc /etc/bash.bashrc
 }
 
 function configure_tmux(){
@@ -113,12 +120,21 @@ function configure_vim(){
 
 	sudo -u $NEW_USER bash -c 'cp vimrc ~/.vimrc'
 	sudo -u $NEW_USER bash -c 'vim ~/.vimrc +PlugInstall +q +q'
+
+	# Add for the root user as well..
+	curl -sfLo ~/.vim/autoload/plug.vim --create-dirs "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
+	cp vimrc /etc/vimrc
+	vim /etc/vimrc +PlugInstall +q +q
 }
 
 function configure_git(){
 	sudo -u $NEW_USER bash -c 'git config --global core.editor "vim"'
 	sudo -u $NEW_USER bash -c 'git config --global user.email "johnhammond010@gmail.com"'
 	sudo -u $NEW_USER bash -c 'git config --global user.name "John Hammond"'
+}
+
+function configure_pacman(){
+	cp mirrorlist /etc/pacman.d/mirrorlist
 }
 
 ##############################################################
@@ -128,11 +144,15 @@ function prepare_opt(){
 }
 
 function install_yay(){
+	pacman -Sy --needed base-devel --noconfirm
 	pushd /opt/
 	git clone https://aur.archlinux.org/yay.git
+
+	chown $NEW_USER:$NEW_USER /opt/yay
 	cd yay
-	makepkg -si
+	sudo -u $NEW_USER bash -c 'cd /opt/yay/ && makepkg -si'
 	popd
+	sudo -u $NEW_USER bash -c 'yes|yay'
 }
 
 ###############################################################
@@ -185,6 +205,7 @@ fi
 
 pre_install
 create_new_user
+configure_pacman
 install_niceties
 configure_x
 configure_terminator
