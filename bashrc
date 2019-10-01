@@ -116,6 +116,16 @@ if ! shopt -oq posix; then
   fi
 fi
 
+
+if [ $XDG_VTNR -eq 1 ]
+then
+	if [ $(tty | grep tty) ]
+	then
+		# on startup....
+		startx
+	fi
+fi
+
 if [ $SHLVL -eq 3 ]
 then
 	tmux

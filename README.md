@@ -1,30 +1,74 @@
-Installing Arch Linux
+Arch Linux
 ======================
 
 > John Hammond | September 29th, 2019
 
 This are my notes while installing and setting up my Arch Linux environment.
 
-I did this on my DELL XPS 15 laptop on September 29th, 2019.
+I did this on my DELL XPS 15 laptop on September 29th, 2019. Following that,
+I began to set up a virtual machine for use at work. The virtual machine required
+a little bit of a different setup, so I decided to write these things down
+and try and automate the procedure.
+
+--------------------------
+
+The `bootstrap.sh` script
+=================
+
+This script is still in development, but it can be used to quickly take a 
+freshly installed Arch Linux system to a fleshed-out and working state (per my own
+idea of "usable").
+
+> **NOTE:** The script is INCOMPLETE, and I will be continuously adding to it.
+
+As of right now, the script will
+
+* Set the locale, "arch" hostname, and EDT5EST timezone
+* Create a new user (or use an existing one) you supply
+* Configure `pacman` to use close mirrors
+* Install:
+	- sudo
+	- pulseaudio (and pavucontrol)
+	- git
+	- vim
+	- tmux
+	- X (and xrandr)
+	- base-devel
+	- i3 (and gnu-free-fonts)
+	- terminator
+	- dmenu
+	- firefox
+	- yay
+* Configure Terminator to use my prefered theme
+* Configure tmux to run on start of a shell
+* Configure X to start i3 and for the first TTY to start the desktop
+* Configure Vim to use the Sublime Text Monokai colorscheme
+* Configure git with my preferred name and e-mail (change this if you use this)
+* Made the /opt directory writeable by the user (I like to store tools there)
 
 
-Downloading the ISO
--------------------
+You can run the script right after a fresh install and you set up GRUB. Replace
+`john` with whatever username you want to be the one managing your system, that
+you use from here on out.
+
+```
+./bootstrap.sh <john>
+```
+
+
+Installing
+------------
+
+**Downloading the ISO**
 
 I downloaded the `archlinux-2019.09.01-x86_64.iso` from here: [https://www.archlinux.org/download/](https://www.archlinux.org/download/).
 I searched for a United States mirror and chose one: specifically, I used: [http://mirrors.acm.wpi.edu/archlinux/iso/2019.09.01/](http://mirrors.acm.wpi.edu/archlinux/iso/2019.09.01/)
 
 
-
-Burning the ISO to a Disc
--------------------------
+**Burning the ISO to a Disc**
 
 I still had Ubuntu at the time, so I burned the Arch Linux ISO to a disc with [Brasero]. 
-
-
-
-Booting the Arch Linux Live Disc
-------------------------
+**Booting the Arch Linux Live Disc**
 
 On my DELL XPS 15, I needed to spam the `F12` key when booting to get to the menu and choose "Boot from CD". **I made sure to boot in UEFI**.
 
@@ -38,10 +82,11 @@ ls /sys/firmware/efi/efivars
 
 This had results, so I knew I successfully booted with UEFI. Good enough!
 
+When I did this on the virtual machine, I did not have results -- it had not booted
+in UEFI. This did not end up mattering much.
 
 
-Connecting to the Internet
-----------------
+**Connecting to the Internet**
 
 On my DELL XPS 15, I wanted to connect to the Internet right away. To get started, I needed to know the name of the
 interface I was working with.
@@ -67,15 +112,22 @@ net start home
 
 At that point, I could connect to the Internet!
 
-Updating the Time Service
-----------------------
+On the virtual machine, I did not need to set any of this up. Because the VM was 
+either bridged or NAT-d, it should have Internet. I did run these commands to 
+snag an IP address (and I often need to do this on boot for the VM):
+
+```
+dhcpcd
+dhcpcd -4
+```
+
+**Updating the Time Service**
 
 ```
 timedatectl set-ntp true
 ```
 
-Partitioning the Disks
-----------------------
+**Partitioning the Disks**
 
 I used this command to determine which devices are set up already.
 
@@ -99,218 +151,71 @@ swapon /dev/nvmen1p3
 
 I handled the `/dev/nvmen1p1` EFI partition later, when I would install GRUB.
 
-Mounting the Filesystem
--------------------
+In the case of the virtual machine, I would need to create these partitions "manually"
+with
+
+```
+cfdisk
+```
+
+I created a 1 GB partition for swap space and another 1 GB for the boot loader (probably don't need that much...) and the rest I reserved for the filesystem.
+
+I would then run the appropriate commands with `/dev/sda1`, `/dev/sda2`, etc.
+
+
+**Mounting the Filesystem**
 
 ```
 mount /dev/nvmen1p2 /mnt
 ```
 
-Installing Arch
--------------
+**Installing Arch**
 
 ```
 pacstrap /mnt base
 ```
 
-Configure the system
--------------
+**Configure the system**
 
 ```
 genfstab -U /mnt >> /mnt/etc/fstab
 ```
 
-Chroot into the new filesystem
-----------------
+**Chroot into the new filesystem**
 
 ```
 arch-chroot /mnt
 ```
 
-Setting the timezone
---------------
-
-```
-ln -sf /usr/share/zoneinfo/EST5EDT /etc/localtime
-hwclock --systohc
-```
-
-Localization
-------------
-
-```
-sed 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen
-echo "LANG=en_US.UTF-8" > /etc/locale.conf
-```
-
-Hostname
-----------
-
-```
-echo arch > /etc/hostname
-
-cat <<EOF >/etc/hosts
-127.0.0.1 localhost
-::1	      localhost
-127.0.1.1 arch.localdomain arch
-EOF
-```
-
-Set root passwd
-----------
+**Setting the root password**
 
 ```
 passwd
 ```
 
-Install GRUB
----------
+**Install GRUB**
 
 ```
 pacman -Sy grub os-prober
 ```
 
-**When I was installing via virtual machine, I just needed to:**
+_When I was installing via virtual machine, I just needed to:_
 
 ```
 grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
-**When I was installing on my hard drive I did:**
+_When I was installing on my hard drive I did:_
 
 ```
 grub-install /dev/nvmen1p3
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
-
 **DO NOT forget to copy over a network profile for `netctl` and install `netctl` and `network-manager`
 so you still have internet access when you reboot into the real system** 
 
-Adding a new user
----------------------
 
-```
-mkdir /home/john
-useradd john
-passwd john
-```
-
-Getting Internet
-----------------
-
-When I was on a virtual machine, I needed to run these commands to get an IP address.
-
-```
-dhcpcd
-dhcpcd -4
-```
-
-Installing Sudo
-----------------
-
-```
-pacman -Sy sudo
-```
-
-Installing Audio Drivers
---------------------
-
-```
-sudo pacman -Sy pulseaudio pavucontrol
-```
-
-
-I needed to restart my computer after running these commands for the sound to start.
-(There was probably a service, but I couldn't find it...)
-
-
-Getting yay and AUR Support
-----------
-
-First get ready to work with PKGBUILD files:
-
-```
-sudo pacman -S --needed base-devel
-```
-
-Then get `yay`:
-
-```
-git clone https://aur.archlinux.org/yay.git
-cd yay
-makepkg -si
-```
-
-
-Correcting .bashrc
-------------------
-
-I copy and pasted the default Ubuntu bashrc from here:
-
-* [https://gist.github.com/indrakaw/1fdbc51639081216f04a025b1add2506](https://gist.github.com/indrakaw/1fdbc51639081216f04a025b1add2506)
-
-Installing tmux
----------------
-
-```
-pacman -Sy tmux
-echo 'source "$HOME/.bashrc"' > ~/.bashrc
-```
-
-Installing xrandr
-----------------
-
-```
-pacman -S xorg-xrandr
-```
-
-Setting proper monitor size
---------------------------
-
-```
-xrandr --output DP-3 --scale 2x2 --mode 2560x1080
-```	
-
-
-Getting monokai in vim
-----------------------
-
-
-First I downloaded vim-plug. [https://github.com/junegunn/vim-plug](https://github.com/junegunn/vim-plug)
-
-```
-curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
-    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-```
-
-Then, I could modify my `~/.vimrc` file to what it is now.
-Then I would run `:PlugInstall` from within vim and it would install the module for me.
-
-Tmux would act strange though -- I would need to be sure to remove all of the tmux
-sessions before I could see the vim changes take effect.
-
-```bash
-tmux ls # to see the running sessions
-tmux kill-session -t 2   # to kill the other sessions
-```
-
-Installing OBS-Studio
---------------
-
-```
-yay -S obs-studio
-```
-
-Installing FontAwesome
------------------------
-
-```
-yay -S ttf-font-awesome
-```
-
-
-> This is incomplete. I need to keep working on this (1109 September 30th 2019)
-
+At this point, the `bootstrap.sh` script could be used.
 

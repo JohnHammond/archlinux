@@ -44,7 +44,8 @@ X_DEPENDENCIES="xorg-xinit xorg-server xorg-xrandr"
 YAY_DEPENDENCINES="base-devel"
 I3_DEPENDENCIES="i3 gnu-free-fonts"
 TERMINATOR_DEPENDENCIES="terminator"
-URXVT_DEPENDENCIES="rxvt-unicode"
+DMENU_DEPENDENCIES="dmenu"
+FIREFOX_DEPENDENCIES="firefox"
 
 DEPENDENCIES="\
  $SUDO_DEPENDENCIES \
@@ -56,7 +57,18 @@ DEPENDENCIES="\
  $YAY_DEPENDENCIES \
  $I3_DEPENDENCIES \
  $TERMINATOR_DEPENDENCIES \
+ $DMENU_DEPENDENCIES \
+ $FIREFOX_DEPENDENCES \
 
+"
+
+
+#############################################################
+
+POLYBAR_DEPENDENCIES="polybar"
+
+YAY_INSTALL="\
+ $POLYBAR_DEPENDENCIES \
 "
 
 ##############################################################
@@ -205,7 +217,9 @@ function install_niceties(){
 	pacman -Sy $DEPENDENCIES --noconfirm --color=always
 }
 
-
+function install_more_niceties(){
+	yay -Sy $YAY_INSTALL --noconfirm
+}
 
 if [ "$1" == "" ]
 then
@@ -225,6 +239,9 @@ configure_tmux
 configure_vim
 configure_git
 prepare_opt
+
 install_yay
+install_more_niceties
+
 
 cleanup
