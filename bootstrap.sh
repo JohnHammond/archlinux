@@ -69,6 +69,7 @@ function configure_x(){
 
 function configure_terminator(){
 	echo_green "Configuring Terminator"
+	mkdir -p ~/.config/terminator
 	cp terminator_config ~/.config/terminator/config
 }
 
@@ -94,6 +95,8 @@ function configure_vim(){
 
 function configure_git(){
 	git config --global core.editor "vim"
+	git config --global user.email "johnhammond010@gmail.com"
+	git config --global user.name "John Hammond"
 }
 
 ###############################################################
