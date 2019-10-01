@@ -3,7 +3,7 @@ Arch Linux
 
 > John Hammond | September 29th, 2019
 
-This are my notes while installing and setting up my Arch Linux environment.
+These are my notes and scripts while installing and setting up my Arch Linux environment.
 
 I did this on my DELL XPS 15 laptop on September 29th, 2019. Following that,
 I began to set up a virtual machine for use at work. The virtual machine required
