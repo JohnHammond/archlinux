@@ -168,15 +168,51 @@ Install GRUB
 
 ```
 pacman -Sy grub os-prober
-
 ```
 
-> This section is incomplete -- I still need to deal with it.
+**When I was installing via virtual machine, I just needed to:**
+
+```
+grub-install /dev/sda
+grub-mkconfig -o /boot/grub/grub.cfg
+```
+
+**When I was installing on my hard drive I did:**
+
+```
+grub-install /dev/nvmen1p3
+grub-mkconfig -o /boot/grub/grub.cfg
+```
 
 
 **DO NOT forget to copy over a network profile for `netctl` and install `netctl` and `network-manager`
 so you still have internet access when you reboot into the real system** 
 
+Adding a new user
+---------------------
+
+```
+mkdir /home/john
+useradd john
+passwd john
+```
+
+Getting Internet
+----------------
+
+When I was on a virtual machine, I needed to run these commands to get an IP address.
+
+```
+dhcpcd
+dhcpcd -4
+```
+
+Installing Sudo
+----------------
+
+```
+pacman -Sy sudo
+```
 
 Installing Audio Drivers
 --------------------
