@@ -257,6 +257,7 @@ Installing tmux
 ```
 pacman -Sy tmux
 echo 'source "$HOME/.bashrc"' > ~/.bashrc
+```
 
 Installing xrandr
 ----------------
