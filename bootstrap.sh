@@ -99,6 +99,10 @@ function configure_x(){
 	echo_green "Configuring X"
 	sudo -u $NEW_USER bash -c 'echo "exec i3" > ~/.xinitrc'
 	sudo -u $NEW_USER bash -c 'cp Xresources ~/.Xresources'
+
+
+	cp /etc/X11/xinit/.xinitrc
+	echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
 }
 
 function configure_terminator(){
