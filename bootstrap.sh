@@ -142,11 +142,10 @@ function configure_vim(){
 
 	sudo -u $NEW_USER bash -c 'cp vimrc ~/.vimrc'
 	sudo -u $NEW_USER bash -c 'vim ~/.vimrc +PlugInstall +q +q'
-	sudo -u $NEW_USER bash -c 'rm ~/.vimrc'
 
 	# Add for the root user as well..
 	curl -sfLo ~/.vim/autoload/plug.vim --create-dirs "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
-	cp vimrc /etc/vimrc
+	mv vimrc /etc/vimrc
 	vim /etc/vimrc +PlugInstall +q +q
 }
 
